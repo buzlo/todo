@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "npm i && npm run build && npx serve dist",
+    "start": "npm i && npm run build && npx serve dist -l 8080",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint ./",
-    "lint:report": "eslint ./"
+    "lint:report": "eslint ./",
+    "test": "vitest",
+    "e2e": "concurrently \"serve dist -l 8080\" \"cypress open --e2e --browser chrome\""
   },
   "dependencies": {
     "@vuelidate/core": "^2.0.2",
@@ -19,11 +21,15 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
+    "concurrently": "^8.0.1",
+    "cypress": "^12.12.0",
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-cypress": "^2.13.3",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-vue": "^9.13.0",
     "serve": "^14.2.0",
-    "vite": "^4.3.2"
+    "vite": "^4.3.2",
+    "vitest": "^0.31.1"
   }
 }

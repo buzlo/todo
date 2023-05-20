@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, unref, watch, computed } from 'vue'
+import { reactive, unref, watch, computed, nextTick } from 'vue'
 import { vMaska } from 'maska'
 import { useVuelidate } from '@vuelidate/core'
 
@@ -30,7 +30,7 @@ const filterData = reactive({ key: 'title', value: '' })
 const filteredList = computed(() =>
   todoList.filter((item) => {
     const regExp = new RegExp(filterData.value, 'i')
-    return regExp.test(item[filterData.key])
+    return regExp.test(item[filterData.key].replace(/\s/g, ''))
   })
 )
 
@@ -43,11 +43,16 @@ function updateStorage() {
   localStorage.setItem('todoList', JSON.stringify(todoList))
 }
 
-async function createTodoItem() {
+async function onSubmit() {
   const isFormCorrect = await unref(v$).$validate()
   unref(v$).$touch()
   if (!isFormCorrect) return
 
+  createTodoItem()
+  nextTick(unref(v$).$reset)
+}
+
+function createTodoItem() {
   const newItem = {
     title: inputsState.title,
     tel: inputsState.tel,
@@ -81,13 +86,13 @@ function updateItem(newItem) {
 <template>
   <h2 class="mt-5 mb-3">Список задач</h2>
 
-  <form class="input-group mb-3">
+  <form class="new-item-form input-group mb-3">
     <input
       v-model="v$.title.$model"
       type="text"
-      class="form-control"
+      class="new-item-form__input form-control"
       :class="{ 'is-invalid': v$.title.$error }"
-      placeholder="Новая задача"
+      placeholder="Новая задача*"
     />
     <input
       v-model="v$.tel.$model"
@@ -95,12 +100,21 @@ function updateItem(newItem) {
       data-maska="+7 ### ###-##-##"
       :class="{ 'is-invalid': v$.tel.$error }"
       type="tel"
-      class="form-control"
-      placeholder="Телефон"
+      class="new-item-form__input form-control"
+      placeholder="Телефон*"
     />
-    <input v-model="inputsState.descr" type="text" class="form-control" placeholder="Описание" />
+    <input
+      v-model="inputsState.descr"
+      type="text"
+      class="new-item-form__input form-control"
+      placeholder="Описание"
+    />
     <div class="input-group-append">
-      <button class="btn btn-secondary" :disabled="false" @click.prevent="createTodoItem">
+      <button
+        class="new-item-form__button btn btn-secondary"
+        :disabled="false"
+        @click.prevent="onSubmit"
+      >
         Добавить
       </button>
     </div>

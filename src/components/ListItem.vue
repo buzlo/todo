@@ -13,16 +13,15 @@ const rules = useCreateRules()
 
 const v$ = useVuelidate(rules, clonedItem)
 
-const inputKeys = ['title', 'tel', 'descr']
 const isEdited = ref(false)
 
 async function onEditedSwitch(item) {
-  isEdited.value = !isEdited.value
-  if (!isEdited.value) {
+  if (isEdited.value) {
     const isFormCorrect = await unref(v$).$validate()
     if (!isFormCorrect) return
     emit('update-item', item)
   }
+  isEdited.value = !isEdited.value
 }
 
 function onDoneSwitch(item) {
@@ -38,18 +37,26 @@ function onDoneSwitch(item) {
   >
     <form class="input-group align-items-center flex-grow-1 mb-3">
       <input
-        v-for="key of inputKeys"
-        :key="key"
-        v-model="clonedItem[key]"
-        v-maska
-        :data-maska="key !== 'tel' ? null : '+7 ### ###-##-##'"
-        :style="key === 'tel' ? { flexBasis: '155px', flexGrow: 0 } : null"
-        :class="{ 'list-group-item-success': item.done }"
+        v-model="clonedItem.title"
+        name="title"
+        :class="{ 'is-invalid': v$.title.$error }"
         class="form-control"
         :disabled="!isEdited"
-        @blur="v$[key]?.$touch"
+        @blur="v$.title.$touch"
       />
-      {{ useFormatDate(item.date) }}
+      <input
+        v-model="clonedItem.tel"
+        v-maska
+        name="tel"
+        data-maska="+7 ### ###-##-##"
+        :style="{ flexBasis: '155px', flexGrow: 0 }"
+        :class="{ 'is-invalid': v$.tel.$error }"
+        class="form-control"
+        :disabled="!isEdited"
+        @blur="v$.tel.$touch"
+      />
+      <input v-model="clonedItem.descr" name="descr" class="form-control" :disabled="!isEdited" />
+      <span>{{ useFormatDate(item.date) }}</span>
     </form>
     <div class="btn-group btn-group-sm">
       <button
